@@ -6,9 +6,11 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using System.Threading.Tasks;
 using Books.Entities;
 using Books.Web.DataContexts;
-using System.Threading.Tasks;
+using Books.Web.ViewModels;
+using AutoMapper.QueryableExtensions;
 
 namespace Books.Web.Controllers
 {
@@ -20,7 +22,22 @@ namespace Books.Web.Controllers
         // GET: Books
         public ActionResult Index()
         {
-            return View(db.Books.ToList());
+            /*
+            var books = db.Books
+                .Select(b => new BookViewModel
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Category = b.Category.ToString()
+                })
+                .ToList();
+            */
+
+            var books = db.Books
+                .ProjectTo<BookViewModel>()
+                .ToList();
+
+            return View(books);
         }
 
         // GET: Books/Details/5
@@ -35,7 +52,10 @@ namespace Books.Web.Controllers
             {
                 return HttpNotFound();
             }
-            return View(book);
+
+            var model = AutoMapper.Mapper.Map<Book, BookViewModel>(book);
+
+            return View(model);
         }
 
         // GET: Books/Create
